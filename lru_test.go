@@ -47,3 +47,50 @@ func TestLRUUpdatesExistingValue(t *testing.T) {
 		t.Errorf("expected value of 2 and true, got %v and %v", v, ok)
 	}
 }
+
+func TestLRUEvictsLeastRecentlyUsed(t *testing.T) {
+	c := lru.New[string, int](2)
+	c.Put("value-1", 1)
+	c.Put("value-2", 2)
+	c.Put("value-3", 3)
+	v, ok := c.Get("value-1")
+	if ok == true {
+		t.Errorf("expected no value and false, got %v and %v", v, ok)
+	}
+	v, ok = c.Get("value-3")
+	if ok != true || v != 3 {
+		t.Errorf("expected value of 3 and true, got %v and %v", v, ok)
+	}
+}
+
+func TestLRUGetUpdatesRecency(t *testing.T) {
+	c := lru.New[string, int](2)
+	c.Put("value-1", 1)
+	c.Put("value-2", 2)
+	c.Get("value-1")
+	c.Put("value-3", 3)
+	v, ok := c.Get("value-2")
+	if ok == true {
+		t.Errorf("expected no value and false, got %v and %v", v, ok)
+	}
+	v, ok = c.Get("value-1")
+	if ok != true || v != 1 {
+		t.Errorf("expected value of 1 and true, got %v and %v", v, ok)
+	}
+}
+
+func TestLRUPutUpdatesRecency(t *testing.T) {
+	c := lru.New[string, int](2)
+	c.Put("value-1", 1)
+	c.Put("value-2", 2)
+	c.Put("value-1", 3)
+	c.Put("value-3", 4)
+	v, ok := c.Get("value-2")
+	if ok == true {
+		t.Errorf("expected no value and false, got %v and %v", v, ok)
+	}
+	v, ok = c.Get("value-1")
+	if ok != true || v != 3 {
+		t.Errorf("expected value of 3 and true, got %v and %v", v, ok)
+	}
+}
