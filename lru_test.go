@@ -15,7 +15,7 @@ func TestEmpty(t *testing.T) {
 func TestLRUGetsEmpty(t *testing.T) {
 	c := lru.New[string, int](2)
 	v, ok := c.Get("miss")
-	if ok == true {
+	if ok == true || v != 0 {
 		t.Errorf("expected no value and false, got %v and %v", v, ok)
 	}
 }
@@ -92,5 +92,14 @@ func TestLRUPutUpdatesRecency(t *testing.T) {
 	v, ok = c.Get("value-1")
 	if ok != true || v != 3 {
 		t.Errorf("expected value of 3 and true, got %v and %v", v, ok)
+	}
+}
+
+func TestLRUWithZeroCapacity(t *testing.T) {
+	c := lru.New[string, int](0)
+	c.Put("value-1", 1)
+	v, ok := c.Get("value-1")
+	if ok == true || v != 0 {
+		t.Errorf("expected no value and false, got %v and %v", v, ok)
 	}
 }
