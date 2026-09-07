@@ -15,7 +15,6 @@ type LRU[K comparable, V any] struct {
 	capacity int
 	list     *list.List
 	mu       sync.Mutex
-	_        struct{}
 }
 
 func New[K comparable, V any](capacity int) *LRU[K, V] {
