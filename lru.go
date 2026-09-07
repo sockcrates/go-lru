@@ -30,9 +30,6 @@ func (l *LRU[K, V]) Put(key K, value V) {
 	l.cache[key] = e
 	if l.list.Len() > l.Capacity {
 		lru := l.list.Back()
-		if lru == nil {
-			return
-		}
 		data := lru.Value
 		delete(l.cache, data.(entry[K, V]).key)
 		l.list.Remove(lru)
