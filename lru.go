@@ -2,6 +2,7 @@ package lru
 
 import (
 	"container/list"
+	"sync"
 )
 
 type entry[K comparable, V any] struct {
@@ -13,6 +14,7 @@ type LRU[K comparable, V any] struct {
 	cache    map[K]*list.Element
 	capacity int
 	list     *list.List
+	mu       sync.Mutex
 	_        struct{}
 }
 
@@ -21,6 +23,8 @@ func New[K comparable, V any](capacity int) *LRU[K, V] {
 }
 
 func (l *LRU[K, V]) Put(key K, value V) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
 	if e, ok := l.cache[key]; ok {
 		e.Value = entry[K, V]{key: key, value: value}
 		l.list.MoveToFront(e)
@@ -37,6 +41,8 @@ func (l *LRU[K, V]) Put(key K, value V) {
 }
 
 func (l *LRU[K, V]) Get(key K) (V, bool) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
 	d, ok := l.cache[key]
 	if !ok {
 		var zero V

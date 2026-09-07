@@ -1,4 +1,4 @@
 go-lru
 ===
 
-A tiny generic LRU cache for Go.
+A tiny generic concurrency-safe LRU cache for Go.

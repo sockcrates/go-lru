@@ -2,6 +2,7 @@ package lru_test
 
 import (
 	"fmt"
+	"sync"
 	"testing"
 
 	"github.com/sockcrates/go-lru"
@@ -101,5 +102,32 @@ func TestLRUWithZeroCapacity(t *testing.T) {
 	v, ok := c.Get("value-1")
 	if ok == true || v != 0 {
 		t.Errorf("expected no value and false, got %v and %v", v, ok)
+	}
+}
+
+func TestLRUConcurrentPutsAndGets(t *testing.T) {
+	c := lru.New[int, int](16)
+	start := make(chan struct{})
+	var wg sync.WaitGroup
+
+	for worker := 0; worker < 32; worker++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			<-start
+			for value := 0; value < 100; value++ {
+				c.Put(value, value)
+				c.Get(value)
+			}
+		}()
+	}
+
+	close(start)
+	wg.Wait()
+
+	c.Put(-1, -1)
+	v, ok := c.Get(-1)
+	if ok != true || v != -1 {
+		t.Errorf("expected value of -1 and true, got %v and %v", v, ok)
 	}
 }
